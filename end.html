@@ -1,0 +1,161 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<meta charset="utf-8"> 
+<title>end</title> 
+<script src="js/jquery-3.0.0.min.js"></script>
+<style>
+.audiomain{ width: 400px; padding: 0px 1px 1px 1px; overflow: hidden; border-radius:100px;-moz-border-radius:100px; --webkit-border-radius:100px; }
+.audiocon{
+FILTER: progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#e6e6e6,endColorStr=#ffffff); /*IE 6 7 8*/ 
+
+background: -moz-linear-gradient(top, #e6e6e6 0%, #ffffff 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e6e6e6), color-stop(100%,#ffffff));
+background: -webkit-linear-gradient(top, #e6e6e6 0%,#ffffff 100%);
+background: -o-linear-gradient(top, #e6e6e6 0%,#ffffff 100%);
+background: -ms-linear-gradient(top, #e6e6e6 0%,#ffffff 100%);
+background: linear-gradient(to bottom, #e6e6e6 0%,#ffffff 100%);
+}
+.audiocon{border-radius:100px;-moz-border-radius:100px; --webkit-border-radius:100px;}
+.audiomain{ 
+	-webkit-box-shadow:0px 0px 4px #ebebeb;  
+  -moz-box-shadow:0px 0px 4px #ebebeb;  
+  box-shadow:0px 2px 4px #ebebeb; 
+  }
+ .btn{ padding: 8px 0px 5px 10px; } 
+.audiomain .btn, .audiomain .bar{ display: inline-block; vertical-align: middle;}
+.audiomain .bar{ width: 295px;margin-left: 5px; background-image: url(img/toeic065.jpg); background-repeat: repeat-x;
+background-size:auto 100%; height: 13px; border-radius:100px;-moz-border-radius:100px; --webkit-border-radius:100px;
+position: relative; }
+.audiomain .bar span{ position: absolute; display: block; height: 100%;
+background-image: url(img/toeic064.jpg);background-repeat: repeat-x;
+background-size:auto 100%; width: 15px;
+border-radius:100px;-moz-border-radius:100px; --webkit-border-radius:100px;
+}
+.audiomain .bar b{ position: absolute; top: -5px; left: 0px; width: 23px; height: 23px; background:url(img/toeic066.png) no-repeat; }
+</style>
+</head>
+<body> 
+
+<div class="audiomain">
+	<div class="audiocon">
+		<div class="btn"><img src="img/toeic063.png"></div>
+		<div class="bar">
+			<span></span>
+			<b id="drag" class="drag"></b>
+		</div>
+	</div>
+</div>
+<audio id="myAudio">
+  <source src="audio/00.ogg" type="audio/ogg">
+  <source src="audio/00.mp3" type="audio/mpeg">
+  您的浏览器不支持 audio 元素。
+</audio>
+ 
+<script>
+var Lleft = $("#drag").offset().left;
+var myAudio = document.getElementById("myAudio");
+var barW = parseInt($('.bar').width());//状态条长度
+var at;
+var om=0;
+myAudio.onended = function() 
+{
+    $('.btn img').attr('src','img/toeic063.png');
+    clearTimeout(at);
+    //alert("音频已播放完成");
+};
+
+
+getTime()
+function getTime() {
+	setTimeout(function () {
+		var duration = myAudio.duration;
+		if(isNaN(duration)){
+			getTime();
+		}
+		else{
+			//该歌曲的总时间 
+			var adutime = myAudio.duration;
+			//每秒走的距离
+			var distW =barW/adutime;
+			 
+			$('.btn').click(function(){ 
+				if(myAudio.paused){
+		            myAudio.play();
+		            $('.btn img').attr('src','img/toeic067.png'); 
+		            
+		            //获取当前播放的时间
+		            var nowstut = myAudio.currentTime;
+		            var nowbarW = nowstut*distW;
+		            palyaud(distW,nowbarW);
+		        }else{
+		        		$('.btn img').attr('src','img/toeic063.png');
+		            myAudio.pause(); 
+		            clearTimeout(at);
+		        }
+						
+				
+			});
+			
+		}
+	}, 10);
+}
+
+
+function palyaud(td,om){  
+	  om=om+td; 
+	 // console.log(om);
+	  at=setTimeout(function (){
+			 	$('.audiomain .bar span').css({'width':15+om});
+			 	$('.audiomain .bar b').css({'left':om});
+			 	palyaud(td,om);
+	  },1000);
+}
+
+
+
+
+
+
+$('#drag').mousedown(function (){
+	  var patch=parseInt($(this).css("height"))/2;  
+	 // myAudio.pause();
+    $(document).mousemove(function (event){ 
+    				 
+    		//该歌曲的总时间 
+    		var adutime = myAudio.duration;
+			//每秒走的距离
+			var distW =barW/adutime;
+			
+    		clearTimeout(at);
+    		
+    		
+            var ox=event.clientX-Lleft//Lleft;
+           // console.log(event.clientX);
+            var l=ox-patch;
+            var w=$('.audiomain .bar').width()-$('#drag').width(); 
+            if(l<0){
+                 l=0;
+                 }
+             else if(l>w){
+                  l=w;      
+                 }
+             
+            var stubi=l/barW;
+            var palytimee = stubi*adutime;
+            myAudio.currentTime=palytimee;
+            palyaud(distW,l);
+        	$('#drag').css({left:l});
+        	$('.audiomain .bar span').css({'width':l+15});
+    });
+});
+$(document).mouseup(function (){
+ 	$(this).unbind("mousemove");
+ 	// myAudio.play();
+}); 
+
+
+</script>
+
+</body> 
+</html>
